@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:th="http://www.thymeleaf.org"
+>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
+    <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0 minimal-ui"></meta>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
+    <meta name="apple-mobile-web-app-capable" content="yes"></meta>
+    <meta name="apple-mobile-web-app-status-bar-style" content="white"></meta>
+    <title>产品说明</title>
+    <link th:href="@{/static/module/css/bootstrap.css}" rel="stylesheet" type="text/css"></link>
+
+    <script th:src="@{/static/js/jquery-1.9.1.min.js}" type="text/javascript"></script>
+    <style>
+        .container-fluid{
+            padding: 0;
+        }
+        .row {
+            margin: 0;
+            padding: 0;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+<div class="page">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <img th:src="@{/static/nocard/images/advertise1.jpg}" width="100%" class="carousel-inner"/>
+            </div>
+            <div class="col-md-12  pic">
+                <div class="row bgn">
+                    <div class="col-xs-4"><img th:src="@{/static/nocard/images/advertise2.jpg}"  class="carousel-inner"/></div>
+                    <div class="col-xs-4">
+                        <img th:src="@{/static/nocard/images/advertise3.jpg}" class="carousel-inner" onclick="goto();"/>
+                        <!-- <button class="btn  btn-lg">报名自己抢</button> -->
+                    </div>
+                    <div class="col-xs-4"><img th:src="@{/static/nocard/images/advertise4.jpg}"  class="carousel-inner"/></div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <img th:src="@{/static/nocard/images/advertise5.jpg}"  class="carousel-inner"/>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    //<![CDATA[
+    var _ctx = [[${application.ctx}]];
+    var ismerchant = [[${ismerchant}]];
+    var agentId = [[${agentId}]];
+    var recMerchantCode = [[${recMerchantCode}]];
+    var url = _ctx + '/user/advertise.htm?ismerchant=' + ismerchant + "&agentId=" + agentId + "&recMerchantCode=" + recMerchantCode;
+    function goto() {
+        location.href = url;
+    }
+
+    //]]>
+</script>
+</body>
+</html>

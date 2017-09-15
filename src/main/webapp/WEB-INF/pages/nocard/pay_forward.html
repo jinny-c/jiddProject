@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<!-- saved from url=(0161)http://a.counect.com/p1_test/sjmwymf/app/checkstand/checkstand.php?appid=9ab74453&vsnid=26066aea&mcode=212fdedf491b&aux=&consumerclient=other&consumeropenid=null -->
+<html  xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+		xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<script th:src="@{/static/js/jquery-1.9.1.min.js}" type="text/javascript"></script>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>
+		<meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0 minimal-ui"></meta>
+		<meta name="format-detection" content="telephone=no"></meta>
+		<title>支付确认</title>
+		
+		<link rel="stylesheet" th:href="@{/static/css/weui.css}"/>
+		<link rel="stylesheet" th:href="@{/static/css/example.css}"/>
+		<link th:href="@{/static/css/css.css}" rel="stylesheet" type="text/css"/>
+	</head>
+	<body id="b_s1">
+		<form id="b2cReturnForm" th:action="${transGatewayUrl}" method="post">
+			<input name="merchNameGroupId" th:value="${merchNameGroupId}" type="hidden"/>
+			<input name="cardNo" th:value="${cardNo}" type="hidden"/>
+			<input name="merchantNo" th:value="${merchantNo}" type="hidden"/>
+			<input name="productChannel" th:value="${productChannel}" type="hidden"/>
+			<input name="orderAmount" th:value="${orderAmount}" type="hidden"/>
+			<input name="orderNo" th:value="${orderNo}" type="hidden"/>
+			<input name="orderTime" th:value="${orderTime}" type="hidden"/>
+			<input name="backendID" th:value="${backendID}" type="hidden"/>
+			<input name="frontUrl" th:value="${frontUrl}" type="hidden"/>
+			<input name="backUrl" th:value="${backUrl}" type="hidden"/>
+			<input name="csn" th:value="${csn}" type="hidden"/>
+			<input name="ip" th:value="${ip}" type="hidden"/>
+			<input name="address" th:value="${address}" type="hidden"/>
+			<input name="location" th:value="${location}" type="hidden"/>
+			<input name="mac" th:value="${mac}" type="hidden"/>
+			<input name="imei" th:value="${imei}" type="hidden"/>
+		</form>
+	</body>
+	<script th:inline="javascript" type="text/javascript">
+	//<![CDATA[
+	   $(function(){
+			$("#b2cReturnForm").submit();
+		});
+	 //]]>
+	</script>
+</html> 

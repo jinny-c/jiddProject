@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:th="http://www.thymeleaf.org"
+>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
+    <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0 minimal-ui"></meta>
+    <meta name="apple-mobile-web-app-capable" content="yes"></meta>
+    <meta name="apple-mobile-web-app-status-bar-style" content="white"></meta>
+    <title>信用卡还款提醒</title>
+    <link th:href="@{/static/css/bank.css}" rel="stylesheet" type="text/css"></link>
+    <link th:href="@{/static/nocard/css/weui.css}" rel="stylesheet" type="text/css"></link>
+
+    <script th:src="@{/static/nocard/js/bin.js}" type="text/javascript"></script>
+    <script th:src="@{/static/js/jquery-1.9.1.min.js}" type="text/javascript"></script>
+    <script th:src="@{/static/nocard/js/wx.js}" type="text/javascript"></script>
+    <style type="text/css">
+        .bank_btn{
+            margin: 15px auto;
+            width: 96%;
+            height: 100px;
+            position: relative;
+            display: block;
+            box-sizing: border-box;
+            color: #666;
+            border-radius: 5px;
+            overflow: hidden;
+            font-size:1.2em;
+            padding-top: 10px;
+            padding-left: 0px;
+            background-color: #EDF4FE
+        }
+
+        .bank_btn .bank_name{
+            padding-left: 80px;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .bank_btn .card_no{
+            padding-left: 80px;
+            font-size: 15px;
+        }
+
+        .bank_btn .prompt{
+            background-color: #DAE9FF;
+            text-align: right;
+            margin-top: 10px;
+            padding-right: 10px;
+        }
+
+    </style>
+</head>
+<body>
+<div class="bank_btn" th:id="${item.cardBankCode}" th:onclick="'edit_bank(\'' + ${item.cardNo} + '\')'" th:each="item : ${userCreditCardList}">
+    <span class="bank_name" th:text="${item.cardBankName}"></span>
+    <p class="card_no" th:text="${item.fullName} + ' | 尾号' + ${item.cardNoFormat1}"></p>
+    <div class="prompt" style="" th:text="'还款日' + ${item.repayDateFormat}"></div>
+</div>
+
+<div class="weui-btn-area">
+    <a class="weui_btn" style="color: #080808" onclick="add_bank()">+&nbsp;添&nbsp;加&nbsp;信&nbsp;用&nbsp;卡</a>
+</div>
+
+<script th:inline="javascript" type="text/javascript">
+    //<![CDATA[
+    
+    //关闭微信头部分享菜单
+    document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
+        WeixinJSBridge.call('hideOptionMenu');
+        WeixinJSBridge.call('hideToolbar');
+    });
+    
+    //添加样式
+    $(function () {
+        $(".bank_btn").each(function (i) {
+            var bankCss = binList[this.id];
+            if (!bankCss) {
+                bankCss = "bank"; // 默认样式
+            }
+            $(this).addClass(bankCss);
+        });
+
+    });
+
+    var _ctx = [[${application.ctx}]];
+    //关闭微信头部分享菜单
+    document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
+        WeixinJSBridge.call('hideOptionMenu');
+        WeixinJSBridge.call('hideToolbar');
+    });
+
+
+    function edit_bank(cardNo) {
+        var code = [[${code}]];
+        location.href = _ctx + '/user/updateCreditCardIndex.htm?cardNo=' + cardNo + '&code=' + code + "&state=STATE";
+    }
+    function add_bank(cardNo) {
+        var code = [[${code}]];
+        location.href = _ctx + '/user/addCreditCardIndex.htm?code=' + code + "&state=STATE";
+    }
+
+    //返回按钮永远返回首页
+   $(function(){
+		        var state = {
+		            title: "title",
+		            url: "#"
+		        };
+		        window.history.pushState(state, "title", "#");
+		        window.addEventListener('popstate', function(e){
+		            window.history.forward(1);
+		        }, false);
+		    });
+    //]]>
+</script>
+</body>
+</html>

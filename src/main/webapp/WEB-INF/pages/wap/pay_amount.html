@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<!-- saved from url=(0161)http://a.counect.com/p1_test/sjmwymf/app/checkstand/checkstand.php?appid=9ab74453&vsnid=26066aea&mcode=212fdedf491b&aux=&consumerclient=other&consumeropenid=null -->
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>
+    <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0 minimal-ui"></meta>
+    <meta name="format-detection" content="telephone=no"></meta>
+    <title th:text="${title}"></title>
+    <link th:href="@{/static/css/checkstand.css}" rel="stylesheet" type="text/css"></link>
+    <link th:href="@{/static/css/update-1.0.css}" rel="stylesheet" type="text/css"></link>
+
+    <script th:src="@{/static/js/jquery-1.9.1.min.js}" type="text/javascript"></script>
+    <script th:src="@{/static/js/fastclick.js}" type="text/javascript"></script>
+    <script th:src="@{/static/js/jweixin-1.0.0.js}" type="text/javascript"></script>
+    <script th:src="@{https://api.map.baidu.com/api?(ak=sg4qhUZDe67Wn0TZgToQfit4chXs038o,s=1)}" type="text/javascript"></script>
+    <script type="application/javascript" th:inline="javascript">
+        //<![CDATA[
+        var _ctx = [[${application.ctx}]];
+        //关闭微信头部分享菜单
+        document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
+            WeixinJSBridge.call('hideOptionMenu');
+            WeixinJSBridge.call('hideToolbar');
+        });
+
+        var merCode = [[${userEntity.merCode}]];
+        var token = [[${paymentToken}]];
+        var maxMount = Number([[${transAmountMaxLimit}]]);//商户单笔限额
+        var num = 0;
+        var dec = 0;
+        var pnt = false;
+        var stp = 0;
+        var isLock = false;
+        var latitude;
+        var longitude;
+
+        var map = new BMap.Map("bdMapBox");
+        var nowCity = new BMap.LocalCity();
+        nowCity.get(bdGetPosition);
+
+        function bdGetPosition(result) {
+            latitude = result.center.lat;
+            longitude = result.center.lng;
+        }
+
+        //格式化金额
+        function formatAmount() {
+            var tmp = num.toString();
+            if (pnt) {
+                tmp += '.' + (dec + 100).toString().substr(1);
+            } else {
+                tmp += '.00';
+            }
+            $("#amount").text(tmp);
+        }
+
+        //获取支付链接 支付
+        function getPayLink(amt) {
+            if (isLock) {
+                $('.empty').addClass('deactive');
+                return;
+            }
+
+            if (Number(amt) == 0) {
+                $(".message").text('金额不能为零');
+                num = 0;
+                dec = 0;
+                stp = 0;
+                pnt = false;
+                return;
+            }
+
+            //获取商户单笔限额，判断是否超额
+            if (Number(amt) > maxMount) {
+                $(".message").text('单笔交易限额为' + maxMount + '元');
+                return;
+            }
+            //判断最低限额
+            var transAmountMinLimitSwitch = [[${transAmountMinLimitSwitch}]];
+            var transAmountMinLimit = [[${transAmountMinLimit}]];
+            if (transAmountMinLimitSwitch != 0) {
+                if (Number(amt) < Number(transAmountMinLimit)) {
+                    $(".message").text('最低交易限额为' + transAmountMinLimit + '元');
+                    return;
+                }
+            }
+
+            var amountFen = amt.replace(/\.(\d{2})\d*/, '$1');
+
+            isLock = true;
+
+            $('.enter').css('background', '#ccc');
+
+// 			$.ajax({
+// 			    type: "GET",
+//                 url: _ctx+"/static/pay/checkMerchantAuthInfo.htm",
+//                 data:{merCode:merCode,token:token,amount:$("#amount").text()},
+//                 dataType: "json",
+// 				success: function(data){
+// 					if(data.msg == 'success'){
+// 						var amount = $("#amount").html();
+// 						location.href= _ctx+'/static/pay/payDetails.htm?amount='+amount+"&token="+token;
+// 					}else{
+// 						var msg = encodeURI(encodeURI(data.msg));
+// 						location.href = _ctx+"/static/pay/toError.htm?msg="+msg;
+// 					}
+// 				}
+// 			});
+
+            location.href = _ctx + '/scanpay/preOrder.htm?amount=' + amountFen + "&token=" + token + "&location=" + latitude + "," + longitude;
+
+        }
+
+        function clearActive() {
+            $(".amount").removeClass('active');
+            $(".deactive").removeClass('deactive');
+        }
+
+        $(function () {
+            new FastClick(document.body);
+
+            $(".key").click(function () {
+                var key = $(this).text();
+                //处理删除按钮
+                if($(this).children("img").length>0){
+                    key = '删除';
+                }
+                $(this).addClass('deactive');
+                $(".amount").addClass('active');
+                var t = setTimeout(clearActive, 50);
+
+                switch (key) {
+                    case '':
+                        break;
+                    case '付款':
+                        var amt = $("#amount").text();
+                        getPayLink(amt);
+                        break;
+                    case '清除':
+                        num = 0;
+                        dec = 0;
+                        stp = 0;
+                        pnt = false;
+                        $(".message").text('');
+                        break;
+                    case '删除':
+                        $(".message").text('');
+                        if (stp == 2) {
+                            dec = Math.floor(dec / 10) * 10;
+                            stp--;
+                        } else if (stp == 1) {
+                            dec = Math.floor(dec / 100);
+                            stp--;
+                        } else {
+                            pnt = false;
+                            num = Math.floor(num / 10);
+                        }
+                        break;
+                    case '.':
+                        pnt = true;
+                        break;
+                    default:
+                        $(".message").text('');
+                        if (pnt) {
+                            if (stp == 0) {
+                                dec = Number(key) * 10;
+                                stp++;
+                            } else if (stp == 1) {
+                                dec += Number(key);
+                                stp++;
+                            }
+                        } else {
+                            if (num.toString().length < 10 && key.toString().length < 2) {
+                                num = num * 10 + Number(key);
+                            } else if (num.toString().length < 9 && key.toString().length > 1) {
+                                num = num * 100;
+                            } else {
+                                $(".message").text('输入金额过大');
+                            }
+                        }
+                        break;
+                }
+                formatAmount();
+            })
+        });
+        //]]>
+    </script>
+</head>
+<body>
+
+<img th:src="@{/static/imgs/head_bg.png}" class="head_bg"/>
+<div class="head_panel">
+    <h4 class="header" th:text="${userEntity.shopName}"></h4>
+    <p>我的店 / <a th:text="${userEntity.merCode}" ></a></p>
+</div>
+<div class="amount">￥ <a id="amount" >0.00</a></div>
+<div class="tip">请向收银员询问应付金额</div>
+
+<div class="keypad">
+    <div class="message" th:text="${msg}"></div>
+    <div class="col">
+        <div class="key digit">1</div>
+        <div class="key digit">4</div>
+        <div class="key digit">7</div>
+        <div class="key digit">0</div>
+    </div>
+    <div class="col">
+        <div class="key digit">2</div>
+        <div class="key digit">5</div>
+        <div class="key digit">8</div>
+        <div class="key point">.</div>
+    </div>
+    <div class="col">
+        <div class="key digit">3</div>
+        <div class="key digit">6</div>
+        <div class="key digit">9</div>
+        <div class="key digit"><img th:src="@{/static/imgs/del.png}" style="max-width:30%; max-height:30%"/></div>
+    </div>
+    <div class="col">
+        <div class="key empty">清除</div>
+        <div class="key enter">付款</div>
+    </div>
+</div>
+
+</body>
+</html>

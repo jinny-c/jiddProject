@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0 minimal-ui"/>
+	<meta name="apple-mobile-web-app-capable" content="yes"/>
+	<meta name="apple-mobile-web-app-status-bar-style" content="white"/>
+	<title>基本信息</title>
+	<script th:src="@{/static/js/jquery-1.9.1.min.js}" type="text/javascript"></script>
+	<link rel="stylesheet" th:href="@{/static/nocard/css/weui.css}"/>
+	<link rel="stylesheet" type="text/css" th:href="@{/static/nocard/css/style.css}"/>
+</head>
+<body>
+	<div class="weui_cells">
+
+		<div class="weui_cell weui_cell_switch">
+            <div class="weui_cell_hd weui_cell_primary">消息通知</div>
+            <div class="weui_cell_ft">
+                <input class="weui_switch" type="checkbox" id = "check" />
+            </div>
+        </div>
+        <div class="weui_cell">
+            <div class="weui_cell_bd weui_cell_primary">
+                <p>客户状态</p>
+            </div>
+            <div class="weui_cell_ft" th:if="${merchant.status eq '00'}">正常</div>
+            <div class="weui_cell_ft" th:if="${merchant.status eq '02'}">审核中...</div>
+        </div>
+        <div class="weui_cell">
+            <div class="weui_cell_bd weui_cell_primary">
+                <p>姓名</p>
+            </div>
+            <div class="weui_cell_ft" th:text="${merchant.nameFormat}"></div>
+        </div>
+        <div class="weui_cell">
+            <div class="weui_cell_bd weui_cell_primary">
+                <p>手机号码</p>
+            </div>
+            <div class="weui_cell_ft" th:text="${merchant.phoneFormat}" ></div>
+        </div>
+        <div class="weui_cell">
+            <div class="weui_cell_bd weui_cell_primary">
+                <p>身份证号码</p>
+            </div>
+            <div class="weui_cell_ft" th:text="${merchant.certNoFormat}"></div>
+        </div>
+        <div class="weui_cell">
+            <div class="weui_cell_bd weui_cell_primary">
+                <p>交易费率</p>
+            </div>
+            <div class="weui_cell_ft" th:text="${merchantRate}"></div>
+        </div>
+        <div class="weui_cell">
+            <div class="weui_cell_bd weui_cell_primary">
+                <p>交易限额</p>
+            </div>
+            <div class="weui_cell_ft" th:text="${userEntity.noCardPayMinAmount+'元---'+userEntity.noCardPayMaxAmount+'元'}"></div>
+        </div>
+    </div>
+    	<!--消息提示框-->
+    <div id="toast" style="display: none;">
+	    <div class="weui_mask_transparent"></div>
+	    <div class="weui_toast">
+	        <i class=""></i>
+    		<p class="weui_toast_content">修改成功</p>
+	    </div>
+	</div>
+
+	<div class="weui_btn_area">
+		<a id="reg_btn" href="#" class="weui_btn blue_btn" onclick="userApplyAgent()">申请成为代理商</a>
+		
+		<a id="reg_btn_unb" href="#" class="weui_btn" style="color: #000000;" onclick="userUnbundling()">退出公众号</a>
+	</div>
+	
+
+	<form id="submitForm" class="form-inline" method="post">
+	</form>
+	
+   <script type="application/javascript" th:inline="javascript">
+	
+	  var _ctx = [[${application.ctx}]];
+	  var isLock = false;
+		//关闭微信头部分享菜单
+      document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
+            WeixinJSBridge.call('hideOptionMenu');
+			WeixinJSBridge.call('hideToolbar');
+        });
+
+		var openid = [[${openId}]]; 
+		//获取后台消息开关值
+		var switch_val = [[${notifyFlag}]];  
+		var flag = 0;
+		//同步消息开关值
+		if( false == switch_val){
+			$("#check").prop('checked',false);
+		}else{
+			$("#check").prop('checked',true);
+		}
+		$('#check').bind('click',function(){
+			//接收款开关标识 1 开 0 关
+			    flag = 0;
+			//获取用户修改后的开关值
+			if($("input[type='checkbox']").is(':checked')){
+				flag = 1;
+			}
+			$.ajax({	
+				url: _ctx+'/user/editPushFlag.htm',
+				method: 'POST',
+				data : {
+					"flag" : flag,
+					"openId" : openid,
+				},
+				dataType: 'text',
+				success: function(data){
+					if(data == 'failEdit'){
+						//修改失败
+						$('#toast i').addClass('weui_icon_msg');
+						$('#toast i').addClass('weui_icon_warn');
+						$('#toast .weui_toast_content').text('修改失败！');
+						$('#toast').show();
+		                setTimeout(function () {
+		                    $('#toast').hide();
+		                }, 2000);
+		                //还原开关值
+		                if(switch_val){
+							$("input[type='checkbox']").prop('checked',false);
+						}else{
+							$("input[type='checkbox']").prop('checked',true);
+						}
+					}else if(data == 'success'){
+						//修改成功
+						$('#toast i').addClass('weui_icon_toast');
+						$('#toast .weui_toast_content').text('修改成功！');
+						$('#toast').show();
+		                setTimeout(function () {
+		                    $('#toast').hide();
+		                }, 2000);
+						$("input[type='checkbox']").prop('checked',true);
+					}else{
+						$('#toast i').addClass('weui_icon_toast');
+						$('#toast .weui_toast_content').text('修改成功！');
+						$('#toast').show();
+		                setTimeout(function () {
+		                    $('#toast').hide();
+		                }, 2000);
+						$("input[type='checkbox']").prop('checked',false);
+					}
+				}
+			});
+		});
+
+		function userApplyAgent(){
+			var url = _ctx+'/user/forwardAgentIndex.htm'
+			$('#submitForm').attr('action',url).submit();
+			}
+		function userUnbundling(){
+		      if (isLock) {
+		            return;
+		        }
+		        
+			 if (confirm("你确认要退出公众号？")) {
+				 $('#reg_btn_unb').addClass('deactive');
+				 isLock = true;
+				$.ajax({
+					url: _ctx+'/user/userUnbundling.htm',
+					method: 'POST',
+					dataType: 'text',
+					success: function(data){
+						if(data == 'success'){
+							//退出成功
+							 WeixinJSBridge.call('closeWindow');   // 关闭微信浏览器
+							 window.opener=null;
+							 window.open('','_self');
+							 window.close();   // 关闭电脑浏览器
+						}else {
+							isLock = false;
+							$('#reg_btn_unb').removeClass('deactive');
+							//异常
+							alert('异常，请稍后再试!');
+						}
+					}
+				});
+			}
+			
+		}
+	</script>	
+</body>
+</html>

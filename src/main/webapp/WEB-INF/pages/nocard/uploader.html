@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<!-- saved from url=(0096)http://a.counect.com/p1_test/sjmwymf/app/mca/removeLimitation.php?o=ojjIJj5xEwGRM4LPJROXl8q8myuA -->
+<html  xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+		xmlns:th="http://www.thymeleaf.org">
+	<head>
+	    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>
+		<meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0 minimal-ui"></meta>
+		<meta name="format-detection" content="telephone=no"></meta>
+		<title>用户开通</title>
+		<link rel="stylesheet" th:href="@{/static/nocard/css/weui.css}"></link>
+		<link type="text/css" rel="stylesheet" th:href="@{/static/nocard/css/style.css}"></link>
+		<script th:src="@{/static/js/jquery.min.js}"></script>
+		<script th:src="@{/static/js/ajaxupload.3.9.js}"></script>
+		<script th:src="@{/static/nocard/js/wx.js}" type="text/javascript"></script>
+		<script th:inline="javascript">
+		 	//<![CDATA[
+		 	
+		 	var lat;
+		    var lng;
+		    var _ctx = [[${application.ctx}]];
+			  // var path = _ctx+'/'+[[${viewPath}]];
+		 	//关闭微信头部分享菜单
+	        document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
+	            WeixinJSBridge.call('hideOptionMenu');
+				WeixinJSBridge.call('hideToolbar');
+	        });
+	        //重复提交标识
+	        var isLock=false;
+		 	var pic_front;//正面照
+		    var pic_verso;//反面照
+		    var pic_Id;//手持证件照
+		    var pic_license;//营业执照
+		    var pic_store;//门面照
+			//显示错误提示
+			function showEorrTips(msg){
+				$('.js_tooltips').text(msg);
+				$('.js_tooltips').show();
+	            setTimeout(function (){
+	                $('.js_tooltips').hide();
+	            }, 3000);
+			}
+		 	//图片上传
+		 
+			var uploadOption = {
+				action: _ctx+'/merch/upload_File.htm',
+				name: "file",
+				autoSubmit: false,
+				onChange: function (file, extension) {
+					//检测上传文件是否为图片
+					if (new RegExp(/(jpg)|(jpeg)|(bmp)|(gif)|(png)/i).test(extension)) {
+						$("#filepath").val(file);
+						this._settings.action =_ctx+"/merch/upload_File.htm?picType="+this._button.id;
+						this.submit();
+					} else {
+						msg="只限上传图片文件，请重新选择！";
+						showEorrTips(msg);
+						return false;
+					}
+					
+				},
+				onSubmit: function (file, extension) {
+					$("#" + this._button.id).css('background', '#fff url('+_ctx+'/static/nocard/images/upload.png) no-repeat');
+					$("#" + this._button.id).css('background-size', '65px 65px');
+					$("#" + this._button.id).css('background-position', 'center');
+				},
+				onComplete: function (file, response) {
+					//上传完成 获取图片路径
+					if('pic_front' == this._button.id){
+						  pic_front = this._button.id; 
+						}
+					if('pic_verso' == this._button.id){
+						  pic_verso = this._button.id; 
+						}
+					if('pic_Id' == this._button.id){
+						pic_Id = this._button.id; 
+						}
+					if(response.indexOf('nginx') > 0 ){
+						    $("#" + this._button.id).css('background', 'url('+_ctx+'/static/nocard/images/plus.png) no-repeat');
+							$("#" + this._button.id).css('background-size', '65px 65px');
+							$("#" + this._button.id).css('background-position', 'center');
+						    msg="上传图片过大！";
+							showEorrTips(msg);	
+							return ;	
+					}
+					if('fail' == response ){
+
+						    $("#" + this._button.id).css('background', 'url('+_ctx+'/static/nocard/images/plus.png) no-repeat ');
+							$("#" + this._button.id).css('background-size', '65px 65px');
+							$("#" + this._button.id).css('background-position', 'center');
+						    msg="上传图片失败，请稍后再试！";
+							showEorrTips(msg);	
+							return ;	
+
+						}
+					//回显上传图片
+					$("#" + this._button.id).css('background', '#fff url('+_ctx+'/static/nocard/images/success.png) no-repeat ');
+					$("#" + this._button.id).css('background-size', '60px 60px');
+					$("#" + this._button.id).css('background-position', 'center');
+					
+				}
+			}
+		    //初始化上传图片控件
+			$(function(){
+				new AjaxUpload("#pic_front", uploadOption);
+				new AjaxUpload("#pic_verso", uploadOption);
+				new AjaxUpload("#pic_Id", uploadOption);
+					
+			});
+			//提交所有信息
+			function sbmt(){
+
+				if($("#pic_front").css("background").indexOf("plus.png")>-1)
+				{
+					showEorrTips("请上传身份证正面照");
+					return false;
+				}
+
+				if($("#pic_verso").css("background").indexOf("plus.png")>-1)
+				{
+					showEorrTips("请上传身份证反面照");
+					return false;
+				}
+
+				if($("#pic_Id").css("background").indexOf("plus.png")>-1)
+				{
+					showEorrTips("请上传手持证件照");
+					return false;
+				}
+				
+				if($("#pic_front").css("background").indexOf("upload.png")>-1)
+				{
+					showEorrTips("请等待身份证正面照片上传完成");
+					return false;
+				}
+				if($("#pic_verso").css("background").indexOf("upload.png")>-1)
+				{
+					showEorrTips("请等待身份证反面照片上传完成");
+					return false;
+				}
+				if($("#pic_Id").css("background").indexOf("upload.png")>-1)
+				{
+					showEorrTips("请等待手持证件照上传完成");
+					return false;
+				}
+				
+				isLock = true;
+
+				$('#open').addClass('deactive');
+				$.ajax({	
+					url:  _ctx+'/merch/register.htm',
+					method: 'POST',
+					dataType: 'text',
+					success: function(data){
+						if(data == '01'){
+							showEorrTips('提交资质信息失败');
+							isLock=false;
+							$('#open').removeClass('deactive');
+						}else if(data == '03'){
+							showEorrTips('用户信息已存在,请重新输入');
+							isLock=false;
+							$('#open').removeClass('deactive');
+						}else if(data == '00'){
+							window.location.href = _ctx+'/user/concern.htm';
+						}else{
+							showEorrTips(decodeURIComponent(data));
+							isLock=false;
+							$('#open').removeClass('deactive');
+					   }
+					}
+				}); 
+			}
+
+			 //禁用返回按钮
+		    $(function(){
+		        var state = {
+		            title: "title",
+		            url: "#"
+		        };
+		        window.history.pushState(state, "title", "#");
+		        window.addEventListener('popstate', function(e){
+		            window.history.forward(1);
+		        }, false);
+		    });
+			//]]>
+		</script>
+		<style type="text/css">
+			.upload_cells{
+				margin-top: 1.17647059em;
+			    /*background-color: #FFFFFF;*/
+			    line-height: 1.41176471;
+			    font-size: 17px;
+			    overflow: hidden;
+			    position: relative;
+			}
+			.upload_cells:before {
+			    content: " ";
+			    position: absolute;
+			    left: 0;
+			    top: 0;
+			    width: 100%;
+			    height: 1px;
+			    /*border-top: 1px solid #D9D9D9;*/
+			    /*color: #D9D9D9;*/
+			    -webkit-transform-origin: 0 0;
+			    transform-origin: 0 0;
+			    -webkit-transform: scaleY(0.5);
+			    transform: scaleY(0.5);
+			}
+			.upload_cells:after {
+			    content: " ";
+			    position: absolute;
+			    left: 0;
+			    bottom: 0;
+			    width: 100%;
+			    height: 1px;
+			    /*border-bottom: 1px solid #D9D9D9;*/
+			    /*color: #D9D9D9;*/
+			    -webkit-transform-origin: 0 100%;
+			    transform-origin: 0 100%;
+			    -webkit-transform: scaleY(0.5);
+			    transform: scaleY(0.5);
+			}
+			.weui_uploader_file {
+			    margin-right: 0px;
+			     width: auto; 
+			}
+			.weui_uploader_file {
+			    float: left;
+			    margin-right: 1em;
+			     width: auto; 
+			     height: auto; 
+			    background: no-repeat center center;
+			    background-size: cover;
+			}
+			.templet{
+				margin: 0 auto;
+			    width: 7.5em;
+			    height: 5.5em;
+			}
+			.pic{
+				background: url(../static/nocard/images/pic.png) no-repeat;
+			    background-size: 100%;
+			    background-position: center;
+			}
+			.front{
+				background: url(../static/nocard/images/front.png) no-repeat;
+			    background-size: 100%;
+			    background-position: center;
+			}
+			.verso{
+				background: url(../static/nocard/images/verso.png) no-repeat;
+			    background-size: 100%;
+			    background-position: center;
+			}
+
+			.add-picture {
+			    margin: .3em auto;
+			    width: 7.5em;
+			    height: 4.5em;
+			    border: 3px dashed #707070;
+			    border-radius: 5%;
+			}
+			#upload_file{
+				width:100%;
+				height:100%;
+			}
+			.plus {
+			    background: url(../static/nocard/images/plus.png) no-repeat;
+			    background-size: 60px 60px;
+			    background-position: center;
+			}
+			
+		</style>
+	</head>
+	<body>
+	    <div id="bdMapBox" style="display:none;"></div>
+	    <!--身份证正面照上传 -->
+	    <div class="upload_cells weui_cells_form">
+	        <div class="weui_cell">
+	            <div class="weui_cell_bd weui_cell_primary">
+	                <div class="weui_uploader">
+	                    <div class="weui_uploader_hd weui_cell">
+	                        <div class="weui_cell_bd weui_cell_primary">添加身份证正面照片</div>
+	                    </div>
+	                    <div class="weui_uploader_bd">
+	                        <ul class="weui_uploader_files">
+	                        	<li class="weui_uploader_file">
+	                            	<div class="templet front"></div>
+	                            </li>
+	                            <li class="weui_uploader_file">
+	                            	<div class="add-picture plus" id="pic_front"></div>
+	                            </li>
+	                        </ul>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	    <!--身份证反面照上传 -->
+	    <div class="upload_cells weui_cells_form">
+	        <div class="weui_cell">
+	            <div class="weui_cell_bd weui_cell_primary">
+	                <div class="weui_uploader">
+	                    <div class="weui_uploader_hd weui_cell">
+	                        <div class="weui_cell_bd weui_cell_primary">添加身份证反面照片</div>
+	                    </div>
+	                    <div class="weui_uploader_bd">
+	                        <ul class="weui_uploader_files">
+	                        	<li class="weui_uploader_file">
+	                            	<div class="templet verso"></div>
+	                            </li>
+	                            <li class="weui_uploader_file">
+	                            	<div class="add-picture plus" id="pic_verso"></div>
+	                            </li>
+	                        </ul>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	    <!--手持证件照上传 -->
+	    <div class="upload_cells weui_cells_form">
+	        <div class="weui_cell">
+	            <div class="weui_cell_bd weui_cell_primary">
+	                <div class="weui_uploader">
+	                    <div class="weui_uploader_hd weui_cell">
+	                        <div class="weui_cell_bd weui_cell_primary">添加手持证身份证照片</div>
+	                    </div>
+	                    <div class="weui_uploader_bd">
+	                        <ul class="weui_uploader_files">
+	                        	<li class="weui_uploader_file">
+	                            	<div class="templet pic"></div>
+	                            </li>
+	                            <li class="weui_uploader_file">
+	                            	<div class="add-picture plus" id="pic_Id"></div>
+	                            </li>
+	                        </ul>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	    <!--立即开通 -->
+	    <div class="weui_btn_area">
+	        <a class="weui_btn blue_btn" id="open" onclick="sbmt()">立&nbsp;即&nbsp;开&nbsp;通</a>
+	    </div>
+	    <!--错误提示 -->
+	    <div class="weui_toptips weui_warn js_tooltips">格式不对</div>
+	    
+	</body>
+</html>

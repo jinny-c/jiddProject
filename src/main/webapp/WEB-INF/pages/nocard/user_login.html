@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8"></meta>
+<meta name="format-detection" content="telephone=no"></meta>
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"></meta>
+<meta name="apple-mobile-web-app-capable" content="yes"></meta>
+<meta name="apple-mobile-web-app-status-bar-style" content="black"></meta>
+<title>用户登录</title>
+<link rel="stylesheet" th:href="@{/static/css/weui.css}"></link>
+<link rel="stylesheet" th:href="@{/static/css/css.css}"></link>
+<link rel="stylesheet" th:href="@{/static/nocard/css/style.css}"></link>
+<link rel="stylesheet" th:href="@{/static/nocard/css/weui.min.css}"></link>
+<script th:src="@{/static/js/jquery-1.9.1.min.js}" type="text/javascript"></script>
+<script th:src="@{/static/nocard/js/wx.js}" type="text/javascript"></script>
+
+<style type="text/css">
+.weui-navbar__item {
+  position: relative;
+  display: block;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+          flex: 1;
+  padding: 13px 0;
+  text-align: center;
+  font-size: 15px;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+.weui-font-color {
+  color: #FF6100;
+  font-weight: bolder;
+}
+
+</style>
+</head>
+<body>
+
+	<div class="weui-navbar">
+		<div class="weui-navbar__item" id="channel_01">秒秒通登录</div>
+		<div class="weui-navbar__item" id="channel_02">公众号登录</div>
+	</div>
+	
+	<div class="weui-tab__panel">
+		<br/>
+	
+		<div id="mmtImg" class="page__bd page__bd_spacing">
+			<div class="weui-footer">
+				<div class="icon-box">
+					<img src="../static/nocard/images/mmt.png" ></img>
+				</div>
+			</div>
+		</div>
+	
+		<div class="weui_cells weui_cells_form" id="WKZF">
+			<div class="weui_cell">
+				<div class="weui_cell_bd weui_cell_primary">
+					<input class="weui_input" type="tel" pattern="[0-9]*"
+						placeholder="请输入手机号" id="mobile" name="mobile"
+						onkeyup="formatMobileNo(this)" onkeydown="formatMobileNo(this)"
+						onchange="formatMobileNo(this)" onblur="vali_recom(this)"></input>
+				</div>
+				<div class="weui_cell_ft">
+					<a href="#" id="getCode" disabled="disabled"
+						class="weui_btn blue_btn deactive"
+						onclick="getValiCode($('#mobile').val())">获取验证码</a>
+				</div>
+			</div>
+			
+			<div class="weui_cell">
+				<div class="weui_cell_bd weui_cell_primary">
+					<input id="vali_code" class="weui_input" type="number"
+						placeholder="请输入验证码" maxlength="6"></input>
+				</div>
+			</div>
+		</div>
+		<!--秒秒通用户登录 -->
+		<div class="weui_cells weui_cells_form" id="FASTBILL">
+			<div class="weui_cell ">
+				<div class="weui_cell_hd">
+					<label class="weui_label">用户名</label>
+				</div>
+				<div class="weui_cell_bd weui_cell_primary">
+					<input id="userName" class="weui_input" type="text"
+						placeholder="请输入用户名" 
+						onblur="this.value=this.value.replace(/\s+/g,'')"
+						onkeypress="this.value=this.value.replace(/\s+/g,'')"
+						maxlength="20"></input>
+				</div>
+			</div>
+			<div class="weui_cell">
+				<div class="weui_cell_hd">
+					<label class="weui_label">密码</label>
+				</div>
+				<div class="weui_cell_bd weui_cell_primary">
+					<input id="password" class="weui_input" type="password" maxlength="12"
+						placeholder="请输入密码" ></input>
+				</div>
+			</div>
+			<div class="weui_cell">
+				<div class="weui_cell_bd weui_cell_primary">
+					<input id="imageCode" class="weui_input" type="text" maxlength="8"
+						placeholder="请输入图形验证码"
+						onblur="this.value=this.value.replace(/\s+/g,'')"
+						onkeypress="this.value=this.value.replace(/\s+/g,'')"
+						></input>
+				</div>
+				<div class="weui_cell_hd">
+					<canvas id="mycanvas" width="90" height="40"></canvas>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!--下一步 -->
+	<div class="weui_btn_area">
+		<a id="reg_btn" href="#" class="weui_btn blue_btn"
+			onclick="userLogin()">登录</a>
+	</div>
+
+	<!--错误提示 -->
+	<div class="weui_toptips weui_warn js_tooltips">格式不对</div>
+	<script type="text/javascript" th:inline="javascript">
+	 //<![CDATA[
+	 
+	    document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
+           WeixinJSBridge.call('hideOptionMenu');
+		   WeixinJSBridge.call('hideToolbar');
+        });
+		//显示错误提示
+	    var _ctx = [[${application.ctx}]];
+		var isLock = false;
+		var sec = 0;
+			
+	  $('#WKZF').hide();
+	  $('#FASTBILL').show();
+	  $('#mmtImg').show();
+      $('#channel_01').addClass('weui-bar__item_on').siblings('.weui-bar__item_on').removeClass('weui-bar__item_on');
+      $('#channel_01').addClass('weui-font-color').siblings('.weui-font-color').removeClass('weui-font-color');
+      setPageTitle('秒秒通用户');
+	  var channel = 'FASTBILL';
+	  clearAll();
+	  randInmageCode();
+	  
+		$(function(){
+		     $('.weui-navbar__item').on('click', function () {
+		    	 clearAll();
+		         $(this).addClass('weui-bar__item_on').siblings('.weui-bar__item_on').removeClass('weui-bar__item_on');
+		         $(this).addClass('weui-font-color').siblings('.weui-font-color').removeClass('weui-font-color');
+		         
+		         if('channel_01'==$(this).attr('id')){
+			         $('#WKZF').hide();
+			         $('#FASTBILL').show();
+			         $('#mmtImg').show();
+			         channel = 'FASTBILL';
+			         setPageTitle('秒秒通用户');
+			        }else{
+			         $('#FASTBILL').hide();
+			         $('#mmtImg').hide();
+			         $('#WKZF').show();
+			         channel = 'WKZF';
+			         setPageTitle('公众号用户');
+				        }
+		     });
+		});
+		
+		function clearAll(){
+			$("#userName").val('');
+			$("#password").val('');
+			$("#imageCode").val('');
+			$("#mobile").val('');
+			$("#vali_code").val('');
+			//clearclearInterval();
+		}
+		
+			function showEorrTips(msg){
+				$('.js_tooltips').text(msg);
+				$('.js_tooltips').show();
+	            setTimeout(function (){
+	                $('.js_tooltips').hide();
+	            }, 3000);
+			}
+
+			//电话号码格式化		
+			function formatMobileNo(mobile){
+				//判断电话号码是否为空，解禁获取验证码按钮
+				if (mobile.value == ""){
+			    	$("#getCode").attr('disabled', 'disabled');
+			    	$("#getCode").addClass('deactive');
+			    	return;
+			    } else if(sec <=0){
+				    //解禁获取验证码按钮
+			    	$("#getCode").removeAttr("disabled");
+			    	$("#getCode").removeClass('deactive');
+			    }
+			    var account = new String (mobile.value);
+			    account = account.substring(0,13); /*帐号的总数, 包括空格在内 */
+			    if (account.match (".[0-9]{3}-[0-9]{4}-[0-9]{4}") == null){
+			        /* 对照格式 */
+			        if (account.match (".[0-9]{3}-[0-9]{4}-[0-9]{4}|" + ".[0-9]{3}-[0-9]{4}-[0-9]{4}|" +".[0-9]{3}-[0-9]{4}-[0-9]{4}") == null){
+			            var accountNumeric = accountChar = "", i;
+			            for (i=0;i<account.length;i++){
+			                accountChar = account.substr (i,1);
+			                if (!isNaN (accountChar) && (accountChar != " ")) accountNumeric = accountNumeric + accountChar;
+			            }
+			            account = "";
+			            for (i=0;i<accountNumeric.length;i++){    /* 可将以下空格改为-,效果也不错 */
+			                if (i == 3) account = account + " "; /* 帐号第四位数后加空格 */
+			                if (i == 7) account = account + " "; /* 帐号第八位数后加空格 */
+			                account = account + accountNumeric.substr (i,1)
+			            }
+			        }
+			    }
+			    else{
+			        account = account.substring (1,3) + " " + account.substring (4,8) + " " + account.substring (12,16);
+			    }
+			    if (account != mobile.value) mobile.value = account;
+			}
+
+			//点击获取验证码按钮显示倒计时间
+			function showWaiting(){
+				if(sec < 60){
+					$("#getCode").text('等待 ' + (60 - sec) + ' 秒');
+					sec++;
+				}else{
+					$("#getCode").text('获取验证码');
+					$("#getCode").removeClass('deactive');
+					$("#getCode").removeAttr("disabled");
+					int_w = window.clearInterval(int_w);
+					sec = 0;
+				}
+			}
+
+			function clearclearInterval(){
+				$("#getCode").text('获取验证码');
+				$("#getCode").removeClass('deactive');
+				$("#getCode").removeAttr("disabled");
+				int_w = window.clearInterval(int_w);
+				sec = 0;
+			}
+
+			//用户名称验证
+			function vali_buss(bussName){
+				if(!/^[a-zA-Z0-9]+$/.test(bussName.value)){
+					showEorrTips('用户名称只能由字母、数字组成！');
+				}
+			}
+
+			function vali_recom(recomPhone){
+				//获取手机号码 去除空格
+				var m = recomPhone.value.replace(/\s+/g,""); 
+				if(m.length != 11){
+					showEorrTips('请输入完整注册手机号');
+					return;
+				}else if(!(/^1[3|4|5|7|8]\d{9}$/.test(m))){
+					showEorrTips('请输入正确的手机号');
+					return;
+				}
+			}
+			
+			//立即注册
+			function userLogin(){
+				//判断立即注册按钮是否解禁
+				if($("#reg_btn").attr('disabled') == 'disabled'){
+					return;
+				}
+
+		        //用户名
+				var userName = $("#userName").val();
+				var password = $("#password").val();
+				var imageCode = $("#imageCode").val();
+				
+				var m = $("#mobile").val().replace(/\s+/g,"");
+				var verifyCode = $("#vali_code").val();
+
+				if('WKZF'==channel){//无卡用户
+					if(!m){
+						showEorrTips('请输入注册手机号');
+						return;
+					}else if(m.length != 11){
+						showEorrTips('请输入完整注册手机号');
+						return;
+					}else if(!(/^1[3|4|5|7|8]\d{9}$/.test(m))){
+						showEorrTips('请输入正确的手机号');
+						return;
+					}
+					if(!verifyCode){
+							showEorrTips("请填写验证码");
+							return false;
+				        }
+					}else{//秒秒通用户
+						if(!userName){
+							showEorrTips('请输入用户名');
+							return;
+						}
+						if(!password){
+							showEorrTips('请输入密码');
+							return;
+						}
+						if(!imageCode){
+							showEorrTips('请输入图形验证码');
+							return;
+						}
+					}
+				
+				$('#reg_btn').addClass('deactive');
+		        if(isLock){
+		       		return;
+		       	}
+		    
+		       	isLock = true;
+		       	
+		       	$.ajax({	
+					url:  _ctx+'/user/userLogin.htm',
+					method: 'POST',
+					data : {
+     					"mobile" : m,
+     					"verifyCode" :verifyCode,
+     					"action" :'login',
+     					"userName" :userName,//用户名
+        	            "password" :password,
+			            "imageCode":imageCode,
+			            "channel":channel
+     				},
+					dataType: 'json',
+					success: function(data){
+						if (data == "" || null == data) {
+							//异常
+							showEorrTips("登录异常，请稍后再试");
+							isLock = false;
+							$('#reg_btn').removeClass('deactive');
+						}else{
+							var code = data.resCode;
+							var msg = data.resMsg;
+							if('00'==code){
+								//验证成功
+								window.location.href =  _ctx+'/user/toSuccess.htm?flag=01';
+								}else{
+									showEorrTips(msg);
+									isLock = false;
+									$('#reg_btn').removeClass('deactive');
+									if('FASTBILL'==channel){//秒秒通用户
+										randInmageCode();
+										}
+									}
+							}
+					}
+				});
+			}
+
+			
+			//获取验证码
+			function getValiCode(mbnum){
+				//判断获取验证码按钮是否解禁
+				if($("#getCode").attr('disabled') == 'disabled'){
+					return;
+				}
+				//获取手机号码 去除空格
+				var m = $("#mobile").val().replace(/\s+/g,""); 
+			
+				if(!m){
+					showEorrTips('手机号码不能为空！');
+					return;
+				}else if(m.length != 11){
+					showEorrTips('请输入完整注册手机号');
+					return;
+				}else if(!(/^1[3|4|5|7|8]\d{9}$/.test(m))){
+					showEorrTips('请输入正确的手机号');
+					return;
+				}
+				$("#getCode").addClass('deactive');
+	 			$("#getCode").attr('disabled', 'disabled');
+	 			int_w = setInterval(showWaiting, 1000);
+				 $.ajax({	
+				 	url:  _ctx+'/user/getRegisterCode.htm?mobile='+m+'&action=login',
+				 	method: 'GET',
+				 	dataType: 'text',
+				 	success: function(data){
+				 		if(data == '01'){
+				 			showEorrTips("验证码暂时无法发送，请稍后再试");
+				 		} else if (data == 'U052') {
+		                    showEorrTips("未查到相关用户");
+		                    clearclearInterval();
+		                } else if(data != '00'){
+				 			showEorrTips(decodeURIComponent(data));
+				 			//clearclearInterval();
+				 		}
+				 	}
+				 });
+			}
+
+			/*生成4位随机数*/
+			 function randInmageCode(){
+				 $.ajax({
+					 	url:  _ctx+'/user/getLoginVerifiCode.htm',
+					 	method: 'GET',
+					 	dataType: 'text',
+					 	success: function(data){
+					 		if(data == '01'){
+					 			showEorrTips("获取图形验证码失败，请稍后再试");
+					 		}
+					 		clickChange(data);
+					 	}
+					 });
+			 }
+			 /*干扰线的随机x坐标值*/
+			 function lineX(){
+			  var ranLineX=Math.floor(Math.random()*90);
+			  return ranLineX;
+			 }
+			 /*干扰线的随机y坐标值*/
+			 function lineY(){
+			  var ranLineY=Math.floor(Math.random()*40);
+			  return ranLineY;
+			 }
+			 function clickChange(data){
+			  var mycanvas=$("#mycanvas");
+			  var cxt=mycanvas[0].getContext('2d');
+			  cxt.fillStyle='#000';//填充色
+			  cxt.fillRect(0,0,90,40);
+			  /*生成干扰线20条*/
+			  for(var j=0;j<20;j++){
+			   cxt.strokeStyle='#FF6100';//干扰线条颜色
+			   cxt.beginPath(); //若省略beginPath，则每点击一次验证码会累积干扰线的条数
+			   cxt.moveTo(lineX(),lineY());
+			   cxt.lineTo(lineX(),lineY());
+			   cxt.lineWidth=0.5;
+			   cxt.closePath();
+			   cxt.stroke();
+			  }
+			  cxt.fillStyle='white';//验证码颜色
+			  cxt.font='bold 20px Arial';//字体
+			  cxt.fillText(data,25,25); //把rand()生成的随机数文本填充到canvas中  
+			 }
+
+			 /*点击验证码更换*/
+			 mycanvas.onclick=function(e){
+			  e.preventDefault(); //阻止鼠标点击发生默认的行为
+			  randInmageCode();
+			 };
+
+			 //更换title的值
+			 var userAgent = navigator.userAgent;
+			 var cookiestr = document.cookie;
+			 if (userAgent.indexOf('cdvsupport') >= 0 || cookiestr.indexOf('cdvsupport') >= 0) {
+			     //alert('nativejs')
+			 document.write("<script type='text/javascript' src='nacodovafile/js/cdplugins.js#nacodovafile'><\/script>");
+			 document.write("<script type='text/javascript' src='nacodovafile/js/cordova.js#nacodovafile'><\/script>");
+			 }
+			 function deviceReadyOne(cb_back){
+			 var deviceReady = function(){
+			         document.removeEventListener("deviceready", deviceReady, false);
+			         if('function' == typeof cb_back){
+			         cb_back();
+			         }
+			 }
+			 document.addEventListener("deviceready", deviceReady, false);
+			 }
+			 // export default {
+			 function setPageTitle(title) {
+			 document.title = title;
+			 var callback = function(){
+			     try{
+			     window.CD58UtilsPlugin.setTitle(title);
+			     }catch(e){}
+			 }
+			 if (window.CD58UtilsPlugin) {
+			     callback();
+			 } else {
+			     deviceReadyOne(callback);
+			 }
+			 }
+			//]]>
+	</script>
+
+</body>
+</html>

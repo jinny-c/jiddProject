@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+>
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>
+    <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0 minimal-ui"></meta>
+    <meta name="apple-mobile-web-app-capable" content="yes"></meta>
+    <meta name="apple-mobile-web-app-status-bar-style" content="white"></meta>
+
+    <title>交易明细查询</title>
+
+    <link rel="stylesheet" th:href="@{/static/css/weui.css}"></link>
+    <link rel="stylesheet" th:href="@{/static/css/example.css}"></link>
+    <link rel="stylesheet" th:href="@{/static/nocard/css/style.css}"></link>
+
+    <link rel="stylesheet" th:href="@{/static/module/css/bootstrap.min.css}" media="screen"></link>
+    <link rel="stylesheet" th:href="@{/static/module/css/font-awesome.min.css}"></link>
+    <link rel="stylesheet" th:href="@{/static/module/css/bootstrap-datetimepicker.css}"></link>
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script type="text/javascript" th:src="@{/static/wat/js/html5shiv.js}"></script>
+    <script type="text/javascript" th:src="@{/static/wat/js/respond.min.js}"></script>
+    <![endif]-->
+    <script th:src="@{/static/js/jweixin-1.0.0.js}" type="text/javascript"></script>
+    <script type="text/javascript" th:src="@{/static/js/jquery-1.9.1.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/module/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/module/js/moment-with-locales.js}"></script>
+    <script type="text/javascript" th:src="@{/static/module/js/bootstrap-datetimepicker.js}"></script>
+   	<script  th:src="@{/static/nocard/js/wx.js}" type="text/javascript"></script>
+    <style>
+        .my_weui_label {
+            display: inline-table;
+            margin-left: 10px;
+            word-wrap: break-word;
+            word-break: break-all;
+        }
+
+        .my_weui_cells {
+            margin-top: 1.17647059em;
+            background-color: #FFFFFF;
+            line-height: 1.41176471;
+            font-size: 17px;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+<form id="queryForm" class="form-inline" action="queryBills.htm" role="form" method="post">
+    <input type="hidden" value="1" name="pageNo"/>
+    <!--填写查询范围 -->
+    <div class="my_weui_cells weui_cells_form">
+        <div class="weui_cell">
+            <div class="weui_cell_hd"><label class="weui_label">起始日期</label></div>
+            <div class="weui_cell_bd weui_cell_primary">
+                <input id='datetimepicker1' name="startTime" class="weui_input" type="date" th:value="${startTime}" placeholder="请输入起始日期"/>
+            </div>
+        </div>
+        <div class="weui_cell">
+            <div class="weui_cell_hd"><label class="weui_label">结束日期</label></div>
+            <div class="weui_cell_bd weui_cell_primary">
+                <!-- class="form-control" -->
+                <input id='datetimepicker2' name="endTime" class="weui_input" type="date" th:value="${endTime}" placeholder="请输入结束日期"/>
+            </div>
+        </div>
+
+        <div class="weui_cell">
+            <div class="weui_cell_hd">
+                <label class="weui_label">交易状态</label>
+            </div>
+            <div class="weui_cell_select">
+                <div class="weui_cell_bd weui_cell_primary">
+                    <select id="trans_state" class="weui_select" name="status">
+                        <option selected="selected" value="">全部</option>
+                        <option value="1">交易成功</option>
+                        <option value="0">交易失败</option>
+                        <option value="2">处理中</option>
+<!--                         <option value="3">未支付</option> -->
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--查询 -->
+    <div class="weui_btn_area">
+        <a class="weui_btn blue_btn" onclick="formSubmit();">查&nbsp;询</a>
+    </div>
+</form>
+<!--错误提示 -->
+<div class="weui_toptips weui_warn js_tooltips">格式不对</div>
+
+<script type="text/javascript" th:inline="javascript">
+    //<![CDATA[
+    //关闭微信头部分享菜单
+    document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
+        WeixinJSBridge.call('hideOptionMenu');
+        WeixinJSBridge.call('hideToolbar');
+    });
+   
+
+    $(function () {
+//         $("#datetimepicker1").focus(function(){
+//             document.activeElement.blur();
+//         });
+
+//         $("#datetimepicker2").focus(function(){
+//             document.activeElement.blur();
+//         });
+
+//        var picker1 = $('#datetimepicker1').datetimepicker({
+//            format: 'YYYY-MM-DD',
+//            locale: moment.locale('zh-cn')
+//        });
+//        var picker2 = $('#datetimepicker2').datetimepicker({
+//            format: 'YYYY-MM-DD',
+//            locale: moment.locale('zh-cn')
+//        });
+//        //动态设置最小值
+//        picker1.on('dp.change', function (e) {
+//            picker2.data('DateTimePicker').minDate(e.date);
+//        });
+//        //动态设置最大值
+//        picker2.on('dp.change', function (e) {
+//            picker1.data('DateTimePicker').maxDate(e.date);
+//        });
+
+        var s1 = [[${startTime}]];
+        var s2 = [[${endTime}]];
+        $('#datetimepicker1').val(s1);
+        $('#datetimepicker2').val(s2);
+    });
+
+    function formSubmit() {
+        var startTime = $("#datetimepicker1").val();
+        var endTime = $("#datetimepicker2").val();
+        if (startTime == "") {
+            showEorrTips("请输入开始日期");
+            return;
+        }
+        if (endTime == "") {
+            showEorrTips("请输入结束日期");
+            return;
+        }
+        if (getDateDiff(startTime, endTime)) {
+            return;
+        }
+        $("#queryForm").submit();
+    }
+
+    function getDateDiff(startDate, endDate)    {
+        var startTime = new Date(startDate).getTime();
+        var endTime = new Date(endDate).getTime();
+        var falg = false;
+        if (startTime > endTime) {
+            showEorrTips("结束日期不能小于起始日期");
+            falg = true;
+        }
+        
+        if(Math.abs((startTime - endTime))/(1000*60*60*24) > 30){
+        	showEorrTips("查询日期不能超过30天");
+        	falg = true;
+        }
+            
+        return falg;
+    }
+
+    //显示错误提示
+    function showEorrTips(msg){
+        $('.js_tooltips').text(msg);
+        $('.js_tooltips').show();
+        setTimeout(function (){
+            $('.js_tooltips').hide();
+        }, 3000);
+    }
+    //]]>
+</script>
+
+</body>
+</html>

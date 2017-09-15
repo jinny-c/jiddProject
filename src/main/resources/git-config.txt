@@ -1,0 +1,27 @@
+--user settings
+
+[user]
+	name = chaijd
+	email = chaijindong@163.com
+[http]
+	sslVerify = false
+
+
+--repository settings
+--repository settings
+
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	logallrefupdates = true
+[remote "origin"]
+	url = https://github.com/jinny-c/jiddProject.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "master"]
+	remote = origin
+	merge = refs/heads/master
+[branch "origin/master"]
+	merge = refs/heads/master
+	remote = origin
+
+ 

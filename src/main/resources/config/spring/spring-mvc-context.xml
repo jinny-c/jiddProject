@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans.xsd 
+      	http://www.springframework.org/schema/aop 
+       	http://www.springframework.org/schema/aop/spring-aop.xsd 
+	   	http://www.springframework.org/schema/context 
+	   	http://www.springframework.org/schema/context/spring-context.xsd 
+	   	http://www.springframework.org/schema/mvc 
+	  	http://www.springframework.org/schema/mvc/spring-mvc.xsd" default-autowire="byName">
+
+<!--     
+    <bean id="propertyConfigurer" class="com.micro.wap.commcon.util.MicroWapConfigurer">
+        <property name="locations">
+            <list>
+                密钥配置
+                <value>http://prop_server/${env_path}/hpayMicroWap/microWap.properties</value>
+            </list>
+        </property>
+    </bean> -->
+
+	<bean class="com.jidd.basic.common.ServiceProvider" scope="singleton"/>
+	<bean id="propertyConfigurer" class="com.jidd.basic.utils.JiddWapConfigurer">
+		<property name="locations">
+			<list>
+				<!-- 配置 -->
+				<value>classpath:conf/jidd.properties</value>
+			</list>
+		</property>
+	</bean>
+    
+	<!-- 打开aspectj aop 注解，强制使用CGLIB代理 -->
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
+    <!-- 启用spring 注解 -->
+	<context:annotation-config />
+    <!-- 配置静态资源 -->
+    <mvc:resources location="/static/" mapping="/static/**" />
+	<!-- 对web包中的所有类进行扫描，以完成Bean创建和自动依赖注入的功能 -->
+	<context:component-scan base-package="com.jidd"/>
+	
+	
+<!--<mvc:annotation-driven/>相当于注册了DefaultAnnotationHandlerMapping和AnnotationMethodHandlerAdapter两个bean，
+	我们主要说明里面的两个，RequestMappingHandlerMapping和RequestMappingHandlerAdapter。
+    第一个是HandlerMapping的实现类，它会处理@RequestMapping 注解，并将其注册到请求映射表中。
+    第二个是HandlerAdapter的实现类，它是处理请求的适配器，说白了，就是确定调用哪个类的哪个方法，并且构造方法参数，返回值。
+ <context:component-scan/>标签是告诉Spring 来扫描指定包下的类，并注册被@Component，@Controller，@Service，@Repository等注解标记的组件。
+    而<mvc:annotation-driven/>是告知Spring，我们启用注解驱动。然后Spring会自动为我们注册上面说到的几个Bean到工厂中，来处理我们的请求。
+ -->
+	
+    <!--配置Spring MVC RequestMappingHandlerMapping -->
+	<mvc:annotation-driven>
+		<!-- RequestMappingHandlerAdapter.customArgumentResolvers -->
+		<mvc:argument-resolvers>
+			<bean class="com.jidd.basic.redefine.JiddSpringWebArgumentResolver" />
+		</mvc:argument-resolvers>
+		<!-- AnnotationDrivenBeanDefinitionParser默认加载StringHttpMessageConverter、MappingJacksonHttpMessageConverter等， 
+			RequestMappingHandlerAdapter.messageConverters -->
+		<mvc:message-converters>
+			<bean class="com.jidd.basic.redefine.JiddObjHttpMsgConvert" />
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+    
+    <!-- configure SimpleMappingExceptionResolver -->
+	<bean class="com.jidd.basic.redefine.JiddSpringExceptionResolver">
+		<!-- 指定所有没有指定的异常,都跳转到该页面 -->
+        <property name="defaultErrorView" value="user/tips" />
+        <!-- 跳转时携带异常对象 -->
+        <property name="exceptionAttribute" value="ex"></property>
+        
+        <!-- <property name="exceptionMappings">
+             <props>
+                 <prop key="java.lang.Exception">user/tips</prop>
+                 <prop key="java.lang.Throwable">user/tips</prop>
+             </props>
+         </property>
+         <property name="statusCodes">
+             <props>
+                 <prop key="user/tips">500</prop>
+                 <prop key="user/tips">404</prop>
+             </props>
+         </property>
+         设置日志输出级别，不定义则默认不输出警告等错误日志信息
+         <property name="warnLogCategory" value="WARN"></property>
+         默认错误页面，当找不到上面mappings中指定的异常对应视图时，使用本默认配置
+         <property name="defaultErrorView" value="user/tips"></property>
+         默认HTTP状态码
+         <property name="defaultStatusCode" value="500"></property> -->
+         
+	</bean>
+
+    <!-- 图片上传 -->
+	<!-- <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver" /> -->
+    
+    <mvc:interceptors>
+        <bean class="com.jidd.view.interceptor.JiddSecretKeyInterceptor">
+    		<property name="privateKey"  value="MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAJQRuwp61c8z29m6UaX+7avKbph0BCusWyJzFzxvLpFOl99rLBn5Gr4u92fIyjIEyqKYMenHwtwKDzXDHJzON/6NP7KsnEKW4UEEsnzvGkfbIYuyE7iAYX+ORJ0PAxDciWJ+aVEU+xlxhK+kFZA76ekqOzm1U64HjcQpRsgasGEFAgMBAAECgYAGz9YCAmqpsKIRny+4akT23UY/Pz8d3z0GFbNg9WB4ENyNy7lorHwdeb2qCaO7r1q/Ji9NqQH+63uNpp8/W4FZ461d5o8gJiIdtIO10xrDGUdt3lSsmNoVs4igVBChd9EcUIOtXBm8g5EBa3kpNxpk+s1H+dK3PLdZQNNF+wOJ9QJBAMUGZY+wNPXNSkHcwBrDME0O3y3hV9UaCs7UVnq7H2T7VrEVEI9Is7XvwCyOqKv7836GZC6PfAX/kCE5x15RRUcCQQDAY/YWd3+OCTG4GeP89jGeVKKv9rFfZc5xomIzZ1BxIzg9v8HbclLxMzThstQuO48rTVlhhII1TNN5su5fAz1TAkB7fMrjCFnpRcYpCacOHxCC+7M+GmLmme/0OnoJaob+z9lCHCXI6JRaj+4u/ysQwFWZE7puxFfDmq5HZONkZiO5AkBmedguh2At67/L7B6AMzKivzoYuDIqOjQIWxIrhzBV0wi1+1nq5a5AQ6I7ReG27oqH6h9dzhL9CPrrq99ERJl5AkEAo7y/HN8zZXgdr5T/ZobwnoctwePDWBcwjD2CorC8Xo498wJVayRT/1614idtVjfDTXE8rgymr+7GPUYtuoJ5eA=="/>
+    		<property name="desKey" value="68616e6470617921"/>
+    	</bean>
+    </mvc:interceptors>
+    
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/user*/**"/>
+            <bean class="com.jidd.view.interceptor.JiddCompatibleInterceptor"/>
+        </mvc:interceptor>
+        <!-- <mvc:interceptor>
+            <mvc:mapping path="/nocard*/**"/>
+            <bean class="com.micro.wap.interceptor.MicroNoCardPermissionInterceptor"/>
+        </mvc:interceptor> -->
+    </mvc:interceptors>
+    
+    
+    <!-- thymeleaf 模板引擎  start-->
+    <bean id="templateResolver" class="org.thymeleaf.templateresolver.ServletContextTemplateResolver">
+        <property name="prefix" value="/WEB-INF/pages/" />
+        <property name="suffix" value=".html" />
+        <property name="templateMode" value="HTML5" />
+        <property name="characterEncoding" value="UTF-8"/>
+        <property name="cacheable" value="false" />
+    </bean>
+    <bean id="templateEngine" class="org.thymeleaf.spring4.SpringTemplateEngine">
+        <property name="templateResolver" ref="templateResolver" />
+    </bean>
+    <bean class="org.thymeleaf.spring4.view.ThymeleafViewResolver">
+        <property name="templateEngine" ref="templateEngine" />
+        <property name="characterEncoding" value="UTF-8"/>
+    </bean>
+ 	<!-- thymeleaf 模板引擎  end-->
+ 
+     <bean class="com.jidd.view.wechat.cache.SpringContextListener"/>
+</beans>

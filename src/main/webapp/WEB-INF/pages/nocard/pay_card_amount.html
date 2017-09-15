@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<!-- saved from url=(0085)http://a.counect.com/p1_test/sjmwymf/app/mca/regEx.php?o=ojjIJjw2XkTVkTUln8AGmTrogx8E -->
+<html  xmlns="http://www.w3.org/1999/xhtml"
+       xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+       xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>
+    <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0 minimal-ui"></meta>
+    <meta name="apple-mobile-web-app-capable" content="yes"></meta>
+    <meta name="apple-mobile-web-app-status-bar-style" content="white"></meta>
+    <!-- 控制浏览器缓存 -->
+    <meta http-equiv="Cache-Control" content="no-store"/>
+    <!-- 优先使用 IE 最新版本和 Chrome -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <title>银联无卡支付收款</title>
+    <link th:href="@{/static/css/weui.css}" rel="stylesheet" type="text/css"></link>
+    <link th:href="@{/static/nocard/css/style.css}" rel="stylesheet" type="text/css"></link>
+    <link th:href="@{/static/nocard/css/keyboardcheckstand.css}" rel="stylesheet" type="text/css"></link>
+
+    <script th:src="@{/static/js/jquery-1.9.1.min.js}" type="text/javascript"></script>
+    <script th:src="@{/static/nocard/js/wx.js}" type="text/javascript"></script>
+    <script th:src="@{/static/js/fastclick.js}" type="text/javascript"></script>
+    <script th:src="@{https://api.map.baidu.com/api?(ak=sg4qhUZDe67Wn0TZgToQfit4chXs038o,s=1)}"
+            type="text/javascript"></script>
+
+    <style type="text/css">
+        .search_show {
+            display: none;
+            margin-top: 1px;
+            overflow-y: auto;
+        }
+        .selected{
+            display: block;
+        }
+        .history_item{
+            width: 100%;
+        }
+        .history_item p{
+            width: 100%;
+            display: inline-block;
+            text-align: center;
+        }
+        .history_btn{
+            background-color: transparent;
+            border-top: 0;
+            border-right: 0;
+            border-bottom: 0;
+            outline: 0;
+            display: inline-block;
+            height: 45px;
+            margin-left: 5px;
+            padding: 0 0.6em 0 0.7em;
+            border-left: 1px solid #E5E5E5;
+            line-height: 45px;
+            vertical-align: middle;
+            font-size: 17px;
+            color: #3CC51F;
+        }
+        .weui-cell_vcode {
+            padding-top: 0;
+            padding-right: 0;
+            padding-bottom: 0;
+        }
+
+        button.weui-vcode-btn {
+            /*background-color: transparent;*/
+            background: url(../static/nocard/images/hiscard.png) no-repeat;
+            background-size: 60%;
+            background-position: center;
+            border-top: 0;
+            border-right: 0;
+            border-bottom: 0;
+            outline: 0;
+        }
+        .weui-vcode-btn {
+            display: inline-block;
+            width: 45px;
+            height: 45px;
+            margin-left: 5px;
+            padding: 0 0.6em 0 0.7em;
+            border-left: 0px solid #E5E5E5;
+            line-height: 45px;
+            vertical-align: middle;
+            font-size: 17px;
+            color: #3CC51F;
+        }
+        .pay_btn_disabled {
+            background-color: #C3CAD2;
+        }
+    </style>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .clearfix:after {
+            content: "\200B";
+            display: block;
+            height: 0;
+            clear: both;
+        }
+
+        .clearfix {
+            *zoom: 1;
+        }
+
+        .wrap {
+            position: relative;
+            margin: auto;
+            max-width: 640px;
+            min-width: 320px;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+            background-size: 100%;
+            overflow: hidden;
+        }
+
+        .head_panel {
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: flex;
+            -webkit-box-align: center;
+            -webkit-align-items: center;
+            align-items: center;
+            color: #000000;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+            width: 75%;
+            border-radius: 2%;
+            margin: 2em auto 1em;
+            padding: 1em;
+            -webkit-box-shadow: 0 0 10px rgba(69, 183, 255, .5);
+            -moz-box-shadow: 0 0 10px rgba(69, 183, 255, .5);
+            box-shadow: 0 0 10px rgba(69, 183, 255, .5);
+            text-align: left;
+            background-color: #fff;
+        }
+
+        .head_img {
+            margin-right: .8em;
+            width: 60px;
+            height: 60px;
+            line-height: 60px;
+            text-align: center;
+        }
+
+        .user_info {
+            -webkit-box-flex: 1;
+            -webkit-flex: 1;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user_info h4 {
+            font-weight: 400;
+            font-size: 17px;
+            width: auto;
+            overflow: hidden;
+            /*text-overflow: ellipsis;*/
+            /*white-space: nowrap;*/
+            word-wrap: normal;
+            word-wrap: break-word;
+            word-break: break-all;
+        }
+
+        .user_info p {
+            color: #999999;
+            font-size: 13px;
+            line-height: 1.2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+        }
+
+        .pay_btn {
+            background: #299dff;
+        }
+
+        .tip {
+            text-align: right;
+            padding-right: 2em;
+        }
+
+        .limit {
+            color: #299dff;
+        }
+
+        .layer-content {
+            display: none;
+            position: absolute;
+            left: 50%;
+            bottom: 0px;
+            width: 100%;
+            max-width: 640px;
+            height: auto;
+            z-index: 12;
+            -webkit-transform: translateX(-50%);
+            transform: translateX(-50%);
+        }
+
+        .deactive {
+            background: #ccc;
+        }
+
+        .point.deactive {
+            background: #fff;
+        }
+
+        .remove.deactive {
+            background: #fff;
+        }
+
+        /*IE/7/6*/
+
+        .cash_input div::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+            -webkit-transition: 1s;
+        }
+
+        .cash_input div::-webkit-scrollbar-thumb {
+            background-color: #a7afb4;
+            background-clip: padding-box;
+            min-height: 28px;
+        }
+
+        .cash_input div::-webkit-scrollbar-thumb:hover {
+            background-color: #525252;
+            background-clip: padding-box;
+            min-height: 28px;
+        }
+
+        .cash_input div::-webkit-scrollbar-track-piece {
+            background-color: #ccd0d2;
+        }
+
+        /* 输入表单 */
+
+        .edit_cash {
+            display: block;
+            margin-top: 15px;
+            padding: 15px;
+            margin: 0 auto;
+            width: 90%;
+            /*border: 1px solid #CFCFCF;*/
+            /*border-radius: 10px;*/
+            /*background-color: #fff;*/
+        }
+
+        .edit_cash p {
+            font-size: 14px;
+            color: #8D8D8F;
+        }
+
+        .cash_input {
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        .cash_input div {
+            border: none;
+            width: 100%;
+            height: 50px;
+            font-size: 25px;
+            line-height: 50px;
+            border-bottom: 1px solid #CFCFCF;
+            text-indent: 100px;
+            outline: none;
+            white-space: pre;
+            overflow-x: scroll;
+            color: #ff6c00;
+        }
+
+        .cash_input span {
+            position: absolute;
+            top: 5px;
+            font-size: 25px;
+        }
+
+        .weui_cell:before {
+            content: " ";
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 1px;
+            border-top: 1px solid #D9D9D9;
+            color: #D9D9D9;
+            -webkit-transform-origin: 0 0;
+            transform-origin: 0 0;
+            -webkit-transform: scaleY(0.5);
+            transform: scaleY(0.5);
+        }
+
+        @keyframes twinkling {
+            0% {
+                opacity: 0; /*透明度为0*/
+            }
+            100% {
+                opacity: 1; /*透明度为1*/
+            }
+        }
+
+        @-moz-keyframes twinkling {
+            0% {
+                opacity: 0; /*透明度为0*/
+            }
+            100% {
+                opacity: 1; /*透明度为1*/
+            }
+        }
+
+        @-o-keyframes twinkling {
+            0% {
+                opacity: 0; /*透明度为0*/
+            }
+            100% {
+                opacity: 1; /*透明度为1*/
+            }
+        }
+
+        @-webkit-keyframes twinkling { /*透明度由0到1*/
+            0% {
+                opacity: 0; /*透明度为0*/
+            }
+            100% {
+                opacity: 1; /*透明度为1*/
+            }
+        }
+
+        .cursor_before:before {
+            content: '';
+            border-left: 2px solid #299dff;
+            -webkit-animation: twinkling 1s infinite ease-in-out;
+            -o-animation: twinkling 1s infinite ease-in-out;
+            -moz-animation: twinkling 1s infinite ease-in-out;
+            animation: twinkling 1s infinite ease-in-out;
+        }
+
+        .cursor_after:after {
+            content: '';
+            border: 1px solid #299dff;
+            -webkit-animation: twinkling 1s infinite ease-in-out;
+            -o-animation: twinkling 1s infinite ease-in-out;
+            -moz-animation: twinkling 1s infinite ease-in-out;
+            animation: twinkling 1s infinite ease-in-out;
+        }
+
+        .my_placeholder{
+            color: #999;
+        }
+
+    </style>
+</head>
+<body>
+<!--收款信息 -->
+<form id="queryForm" class="form-inline" action="noCardPayTransfer.htm" method="post">
+    <input type="hidden" name="location" value=""/>
+    <input type="hidden" name="cardId" value=""/>
+    <input type="hidden" name="cardNo" value=""/>
+    <input type="hidden" name="amount" value=""/>
+    <input type="hidden" name="merchantTypeCode" value=""/>
+    <input type="hidden" name="merchantCode" th:value="${userEntity.merCode}"/>
+    <input type="hidden" name="channel" th:value="${userEntity.channel}"/>
+    <input type="hidden" name="clientChannel" th:value="${userEntity.clientChannel}"/>
+    <input type="hidden" name="clientVersion" th:value="${userEntity.clientVersion}"/>
+</form>
+
+<div class="weui_toptips" style="text-align: left; padding-left: 10px; display: block; background-color: #D3E9FE; color: #000000; font-family: Microsoft YaHei">
+    <img th:src="@{/static/nocard/images/alert.png}" width="12px" height="12px"/>&nbsp;请使用持卡人本人的银行卡
+</div>
+
+<!--收款信息 -->
+<div class="weui_cells weui_cells_form">
+    <br/>
+    <div class="weui_cell">
+        <div class="weui_cell_hd"><label class="weui_label" style="width: 75px">支付金额</label></div>
+        <div class="weui_cell_bd weui_cell_primary">
+            <!--<input id="amount" class="weui_input" readonly="readonly" placeholder="0.00"/>-->
+            <div id="payAmount" class="weui_input"><span style="color: #999999; padding-left: 2px;">支付金额</span></div>
+        </div>
+    </div>
+    <div class="weui_cell weui-cell_vcode">
+        <div class="weui_cell_hd"><label class="weui_label" style="width: 75px">银行卡号</label></div>
+        <div class="weui_cell_bd weui_cell_primary">
+            <!--<input id="bankCardNo" class="weui_input" readonly="readonly" placeholder="信用卡/储蓄卡" maxlength="19" style="width: 120%"/>-->
+            <div id="bankCardNo" class="weui_input"><span style="color: #999999; padding-left: 2px;">信用卡/储蓄卡</span></div>
+        </div>
+        <div class="weui_cell_ft">
+            <button class="weui-vcode-btn history_btn" type="button"></button>
+        </div>
+    </div>
+    <div class="weui_cell weui_cell_select" style="padding: 0">
+        <div class="weui_cell_hd " style="width: 90px">&nbsp;&nbsp;&nbsp;商户类别</div>
+        <div class="weui_cell_bd weui_cell_primary">
+            <select id="merchTypeSelect" class="weui_select" style="padding-left: 2px;" onChange="changeMerch()">
+                <option value="">请选择商户类别</option>
+                <option th:each="item : ${list}" th:value="${item.id}" th:text = "${item.groupName}"></option>
+            </select>
+        </div>
+    </div>
+    <div class="weui_cells weui_cells_access search_show" id="search_show">
+        <div class="weui_cell" th:each="item:${userHisCardList}">
+            <div th:id="${item.cardId}" class="weui-cell_bd weui-cell_primary history_item">
+                <p th:text="${item.bankName} + ' ' + ${item.cardNo}"></p>
+            </div>
+        </div>
+        <div class="weui_cell">
+            <div class="weui-cell_bd weui-cell_primary" style="width: 100%;text-align: center;" onclick="clearHisCard();">
+                <p>清除历史卡</p>
+            </div>
+        </div>
+    </div>
+</div>
+<!--错误提示 -->
+<div class="weui_toptips weui_warn js_tooltips">格式不对</div>
+<div class="wrap">
+    <div class="weui_btn_area">
+        <button id="payButton" class="weui_btn blue_btn" onclick="formSubmit();">付&nbsp;款</button>
+    </div>
+</div>
+<!--数字键盘 -->
+<div class="layer-content">
+    <div align="center" style="background-color: #e5e5e5;height: 30px;" onclick="removeFromWindow()">
+        <img align="center" th:src="@{/static/nocard/images/arrowdown.png}" style="height: 40%"/>
+    </div>
+    <div class="keypad">
+        <div class="key digit">1</div>
+        <div class="key digit">2</div>
+        <div class="key digit">3</div>
+        <div class="key digit">4</div>
+        <div class="key digit">5</div>
+        <div class="key digit">6</div>
+        <div class="key digit">7</div>
+        <div class="key digit">8</div>
+        <div class="key digit">9</div>
+        <div class="key point">.</div>
+        <div class="key digit">0</div>
+        <div class="key remove"><img th:src="@{/static/imgs/del2.png}" style="padding-top: 12px"/></div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    //<![CDATA[
+
+    //关闭微信头部分享菜单
+    document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
+        WeixinJSBridge.call('hideOptionMenu');
+        WeixinJSBridge.call('hideToolbar');
+    });
+
+
+    var latitude;
+    var longitude;
+    var map = new BMap.Map("bdMapBox");
+    var nowCity = new BMap.LocalCity();
+    nowCity.get(bdGetPosition);
+    function bdGetPosition(result) {
+        latitude = result.center.lat;
+        longitude = result.center.lng;
+    }
+
+    //验证银行卡号 onblur="validBankCardNo(this.value)"
+    function validBankCardNo(bankNo){
+        var cardId = $("input[name='cardId']").val();
+        if (cardId != "") {
+            return;
+        }
+        if(!/^(\d{11,19})$/.test(bankNo)){
+            showEorrTips('请输入正确的银行卡号！');
+        }
+    }
+
+    //验证交易金额onblur="validAmount(this.value)"
+    function validAmount(amount){
+        var regexp = new RegExp("^(([1-9]\\d*)|0)(\\.\\d{1,2})?$");
+        amount = amount.replace(/\s+/g,"");
+        if(!regexp.test(amount)) {
+            showEorrTips("请输入正确交易金额");
+        }
+    }
+
+    //格式化金额
+    function formatAmount() {
+        var tmp ='';
+        if(pnt){
+            if(pnt_bef.toString().length==0){
+                pnt_bef='0';
+                tmp +=pnt_bef+ '.';
+            }else{
+                tmp +=pnt_bef+ '.' + pnt_aft;
+            }
+
+        }else{
+            tmp +=pnt_bef;
+        }
+        if (tmp == "0.00" || tmp == "") {
+            $("#payAmount").html("<span style='color: #999999; padding-left: 2px;'>支付金额</span>");
+            mockPlaceholder("amount");
+        } else {
+            $("#payAmount").text(tmp); //div
+            mockPlaceholder("amount");
+        }
+    }
+
+    //格式化银行卡号
+    function formatBankCardNo(){
+        //只要修改银行卡输入框，就将历史卡记录清空
+        var cardIdJQ = $("input[name='cardId']"), cardId = cardIdJQ.val();
+        if (cardId != "") {
+            cardIdJQ.val("");
+            $("#bankCardNo").val("");
+        }
+        var bankCardNoJQ = $("#bankCardNo"), v = bankCardNoJQ.text();
+        /\S{11,19}/.test(v) && bankCardNoJQ.text(v.replace(/\s/g,''));
+//        /\S{5}/.test(v) && bankCardNoJQ.val(v.replace(/\s/g,'').replace(/(.{4})/g, "$1 "));
+    }
+
+    var transAmountMinLimit = [[${transAmountMinLimit}]];
+    var transAmountMaxLimit = [[${transAmountMaxLimit}]];
+    function formSubmit() {
+        var amount = $("#payAmount").text();
+        var regexp = new RegExp("^(([1-9]\\d*)|0)(\\.\\d{1,2})?$");
+        if (amount == null || amount == "" || amount == undefined||!regexp.test(amount)) {
+            showEorrTips("交易金额为空或格式不正确");
+            return false;
+        }
+
+        if (Number(amount) < Number(transAmountMinLimit)) {
+            showEorrTips("最低交易限额为" + transAmountMinLimit + "元");
+            return false;
+        }
+        if (Number(amount) > Number(transAmountMaxLimit)) {
+            showEorrTips("单笔交易限额为" + transAmountMaxLimit + "元");
+            return false;
+        }
+        var amountFen = "";
+        if (/\.(\d{2})\d*/.test(amount)) {
+            amountFen = amount.replace(/\.(\d{2})\d*/, '$1');
+        } else if(/\.(\d{1})\d*/.test(amount)) {
+            amountFen = amount.replace(/\.(\d{1})\d*/, '$1' + 0);
+        } else {
+            amountFen = amount + '00';
+        }
+        $("input[name='amount']").val(amountFen);
+
+        var cardId = $("input[name='cardId']").val();
+        if (cardId == null || cardId == "" || cardId == undefined) {
+            var cardNo = $("#bankCardNo").text().replace(/\s+/g,"");
+            if (cardNo == null || amount == "" || amount == undefined) {
+                showEorrTips("交易金额不能为空");
+                return false;
+            }
+
+            if(!/^(\d{11,19})$/.test(cardNo)){//获取银行卡
+                showEorrTips('请输入正确的银行卡号！');
+                return false;
+            }
+            $("input[name='cardNo']").val(cardNo);
+        }
+
+        $("input[name='location']").val(latitude + "," + longitude);
+        var merchTypeJQ = $("#merchTypeSelect"), merchTypeCode = merchTypeJQ.val();
+        if (merchTypeCode == "") {
+            showEorrTips('请选择商户类别！');
+            return false;
+        }
+        $("input[name='merchantTypeCode']").val(merchTypeCode);
+
+//        console.info("cardID=" + $("input[name='cardId']").val());
+//        console.info("cardNo=" + $("input[name='cardNo']").val());
+//        console.info("amount=" + $("input[name='amount']").val());
+//        console.info("merchantTypeCode=" + $("input[name='merchantTypeCode']").val());
+
+        $('#payButton').addClass("pay_btn_disabled");
+        $('#payButton').attr('disabled',"true");
+        $.ajax({
+            url:  _ctx + '/nocardpay/checkCardThreeElement.htm',
+            method: 'POST',
+            data : {
+                "merchantCode" : [[${userEntity.merCode}]],
+                "cardNo" : cardNo,
+                "cardId" : cardId
+            },
+            dataType: 'text',
+            success: function(data){
+                if(data == '00'){
+                    $("#queryForm").submit();
+                } else if(data == '01'){
+                    showEorrTips("银行卡号不能为空！");
+                } else if(data == '02'){
+                    showEorrTips("银行卡号无效！");
+                } else if(data == '03'){
+                    showEorrTips("用户信息不存在！");
+                } if(data == '04'){
+                    showEorrTips("请输入用户本人的银行卡号！");
+                }
+            },
+            complete:function() {
+                $('#payButton').removeClass("pay_btn_disabled");
+                $('#payButton').removeAttr('disabled');
+            }
+        });
+    }
+
+    //显示错误提示
+    function showEorrTips(msg){
+        $('.js_tooltips').text(msg);
+        $('.js_tooltips').show();
+        setTimeout(function (){
+            $('.js_tooltips').hide();
+        }, 3000);
+    }
+
+    // 历史下拉选项
+    $('.history_item').click(function (e){
+        $('#search_show').removeClass('selected');
+        var text = this.firstElementChild.innerText;
+        $("#bankCardNo").text(text.substring(text.indexOf("*")));
+        $("input[name='cardId']").val(this.id);
+        $("input[name='cardNo']").val("");
+
+        // 显示数字键盘
+        $('.layer-content').show();
+        focus = "cardNo";
+        mockPlaceholder(focus);
+        e.stopPropagation();
+    });
+
+    // 模拟placeholder效果
+    function mockPlaceholder(focus) {
+        $('#payAmount').removeClass("cursor_before cursor_after");
+        $('#bankCardNo').removeClass("cursor_before cursor_after");
+        $("#payAmount span").css("padding-left", "2px");
+        $("#bankCardNo span").css("padding-left", "2px");
+
+        if (focus=="cardNo") {
+            if ($("#bankCardNo span").length > 0) {
+                $("#bankCardNo span").css("padding-left", "");
+                $('#bankCardNo').addClass("cursor_before");
+            } else {
+                $('#bankCardNo').addClass("cursor_after");
+            }
+            return;
+        }
+
+        if (focus=="amount") {
+            if ($("#payAmount span").length > 0) {
+                $("#payAmount span").css("padding-left", "");
+                $('#payAmount').addClass("cursor_before");
+            } else {
+                $('#payAmount').addClass("cursor_after");
+            }
+        }
+    }
+
+    var _ctx = [[${application.ctx}]];
+    function clearHisCard() {
+        if (confirm("你确认要清除所有历史卡记录吗？")) {
+            //清空历史卡记录
+            $("input[name='cardId']").val("");
+            $.ajax({
+                url:  _ctx + '/nocardpay/clearUserHisCard.htm',
+                method: 'GET',
+                success: function(data){
+                    if(data == '00'){
+                        //重新加载页面
+                        window.location.reload();
+                    } else {
+                        showEorrTips("用户历史记录清除失败！");
+                    }
+                }
+            });
+        }
+    }
+
+    //]]>
+
+
+</script>
+
+
+<script th:inline="javascript" th:if="${userHisCardList.size()} gt 0">
+    //<![CDATA[
+
+    //历史下拉按钮
+    $('.history_btn').click(function (){
+        if($('#search_show').hasClass('selected')){
+            $('#search_show').removeClass('selected');
+        }else{
+            $('#search_show').addClass('selected');
+            //隐藏数字键盘
+            $('.layer-content').hide();
+            mockPlaceholder("");
+            focus = "cardNo";
+        }
+    });
+
+    //]]>
+
+
+</script>
+
+
+<script type="application/javascript" th:inline="javascript">
+    //<![CDATA[
+    var pnt_bef ='';//小数点前的数字
+    var pnt_aft ='';//小数点后的数字
+    var pnt = false;//是否有小数点
+    var focus = ""; //当前焦点
+
+    function removeFromWindow() {
+        $('.layer-content').hide();
+        mockPlaceholder("");
+    }
+
+
+    function clearActive() {
+        $(".key").removeClass('deactive');
+    }
+
+    $(function () {
+        // 弹出数字键盘
+        $('#payAmount').click(function (e) {
+            $('.layer-content').show();
+            focus = "amount";
+            mockPlaceholder(focus);
+            e.stopPropagation();
+            //隐藏历史卡下拉项
+            $('#search_show').removeClass('selected');
+        });
+
+        // 弹出数字键盘
+        $('#bankCardNo').click(function (e) {
+            $('.layer-content').show();
+            focus = "cardNo";
+            mockPlaceholder(focus);
+            e.stopPropagation();
+            //隐藏历史卡下拉项
+            $('#search_show').removeClass('selected');
+        });
+
+        //隐藏数字键盘
+        $('.wrap').click(function () {
+            $('.layer-content').hide();
+            mockPlaceholder("");
+        });
+
+        new FastClick(document.body, {tapDelay: 50});
+
+        $(".key").click(function () {
+            var key = $(this).text();
+            //处理删除按钮
+            if($(this).children("img").length>0){
+                key = 'AC';
+            }
+            $(this).addClass('deactive');
+            var t = setTimeout(clearActive, 50);
+
+            switch (focus) {
+                case 'amount':
+                    processAmount(key);
+                    break;
+                case 'cardNo':
+                    processCardNo(key);
+                    break;
+            }
+        });
+
+        function processCardNo(key) {
+            switch (key) {
+                case '':
+                    break;
+                case 'AC':
+                    if ($("#bankCardNo span").length > 0) {
+                        break;
+                    }
+
+                    //只要修改银行卡输入框，就将历史卡记录清空
+                    var cardIdJQ = $("input[name='cardId']"), cardId = cardIdJQ.val();
+                    if (cardId != "") {
+                        cardIdJQ.val("");
+                        $("#bankCardNo").text("");
+                    }
+
+                    var bankCardNoJQ = $("#bankCardNo");
+                    var cardNo = bankCardNoJQ.text().slice(0,-1);
+                    cardNo = cardNo.replace(/\s$/,'');
+                    if (cardNo == "") {
+                        bankCardNoJQ.html("<span style='color: #999999; padding-left: 2px;'>信用卡/储蓄卡</span>")
+                    } else {
+                        bankCardNoJQ.text(cardNo);
+                    }
+                    break;
+                case '.':
+                    break;
+                default:
+                    if ($("#bankCardNo span").length > 0) {
+                        $('#bankCardNo').text('');
+                    }
+                    var bankCardNoJQ = $("#bankCardNo");
+                    var cardNo = bankCardNoJQ.text();
+                    if (cardNo.length >= 19) {
+                        break;
+                    }
+                    bankCardNoJQ.text(cardNo + key);
+                    formatBankCardNo();
+                    break;
+            }
+            mockPlaceholder("cardNo");
+        }
+
+        function processAmount(key) {
+            switch (key) {
+                case '':
+                    break;
+                case 'AC':
+                    if(pnt){
+                        //有小数点
+                        if(pnt_aft.toString().length >0){
+                            pnt_aft= pnt_aft.substring(0,pnt_aft.length-1);
+                        }else if(pnt_aft.toString().length==0){
+                            pnt=false;
+                        }
+                    }else{
+                        pnt_bef= pnt_bef.substring(0,pnt_bef.length-1);
+                    }
+                    break;
+                case '.':
+                    pnt = true;
+                    break;
+                default:
+                    if(pnt){
+                        //判断小数点后数值是否超过两位
+                        if(pnt_aft.toString().length < 2){
+                            pnt_aft += key;
+                        }
+                    }else{
+                        //无小数点
+                        //判断小数点前数值是否超过八位
+                        if(pnt_bef.toString().length < 8){
+                            if(pnt_bef=="0"){
+                                pnt_bef = key;
+                            }else{
+                                pnt_bef += key;
+                            }
+                        }
+                    }
+                    break;
+            }
+            formatAmount();
+        }
+    });
+
+    function changeMerch() {
+        $("#merchTypeSelect").removeClass('my_placeholder');
+        //隐藏数字键盘
+        $('.layer-content').hide();
+        mockPlaceholder("");
+    }
+
+    $(function () {
+        $("#merchTypeSelect").addClass('my_placeholder');
+
+        // 计算高度，处理历史卡记录展示不全的问题
+        var height = window.screen.height;
+        height = height - height * 0.6;
+        var size = [[${userHisCardList.size()}]];
+        if (size) {
+            var hisCardHeight = Number(size) * 44;
+            if (hisCardHeight > height) {
+                $('#search_show').css("height", height);
+            }
+        }
+    });
+
+    //]]>
+</script>
+
+</body>
+</html>
