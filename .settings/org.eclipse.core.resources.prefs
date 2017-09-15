@@ -1,5 +1,10 @@
 eclipse.preferences.version=1
 encoding//src/main/java=UTF-8
 encoding//src/main/resources=UTF-8
+encoding//src/main/resources/prop=UTF-8
+encoding//src/main/resources/prop/config-jidd.properties=UTF-8
+encoding//src/main/resources/prop/config-prod.properties=UTF-8
+encoding//src/main/resources/prop/config-sandbox.properties=UTF-8
+encoding//src/main/resources/prop/config-test.properties=UTF-8
 encoding//src/test/java=UTF-8
 encoding/<project>=UTF-8
