@@ -14,9 +14,8 @@ public class MethodDoTest {
 		TicketCounter tc1 = new TicketCounter();
 		TicketCounter tc2 = new TicketCounter(19);
 
-		method1(tc1);
+		//method1(tc1);
 		//method1(tc2);
-		method2();
 		method2();
 	}
 
