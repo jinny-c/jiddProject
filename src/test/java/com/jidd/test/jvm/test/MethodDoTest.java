@@ -52,22 +52,24 @@ public class MethodDoTest {
 
 	private static void method2() {
 		int corePoolSize = 3;
-		int maxPoolSize = 5;
+		int maxPoolSize = 4;
 		int keepAliveTime = 100;
 		//直接提交策略
 		ThreadPoolExecutor executor1 = new ThreadPoolExecutor(corePoolSize, maxPoolSize, keepAliveTime,
 				TimeUnit.MILLISECONDS, new SynchronousQueue<Runnable>(),new AbortPolicy());
 		//无界队列策略
 		ThreadPoolExecutor executor2 = new ThreadPoolExecutor(corePoolSize, maxPoolSize, keepAliveTime,
-				TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),new CallerRunsPolicy());
+				TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
 		//有界队列
 		ThreadPoolExecutor executor3 = new ThreadPoolExecutor(corePoolSize, maxPoolSize, keepAliveTime,
-				TimeUnit.MILLISECONDS, new ArrayBlockingQueue<Runnable>(5));
+				TimeUnit.MILLISECONDS, new ArrayBlockingQueue<Runnable>(1),new CallerRunsPolicy());
 		
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < 6; i++) {
             // 产生一个任务，并将其加入到线程池
             String task = "task@ " + i;
             System.out.println("put task=" + task);
+            executor1.execute(new SaleTickets1());
+            executor2.execute(new SaleTickets1());
             executor3.execute(new SaleTickets1());
 		}
 		

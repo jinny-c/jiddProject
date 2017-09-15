@@ -7,7 +7,7 @@ public class SaleTickets1 extends Thread {
 	public int count;
 	
 	public SaleTickets1() {
-		total = 10;
+		total = 5;
 		count = 0;
 	}
 	
@@ -21,7 +21,7 @@ public class SaleTickets1 extends Thread {
 		while (true) {
 			try {
 				// 买票前准备,休眠1毫秒模拟拿出证件
-				Thread.sleep(4);
+				Thread.sleep(400);
 				// 获取当前线程名字
 				String threadName = Thread.currentThread().getName();
 				if (!sale(threadName)) {
