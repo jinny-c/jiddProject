@@ -175,6 +175,8 @@
 				<li><a href="user/publicEntrance_2.htm">publicEntrance_2</a></li>
 				<li><a href="user/toSuccess.htm">toSuccess</a></li>
 				<li><a href="https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb17ce3d03ed8073e&redirect_uri=http://10.148.21.80:8081/jiddProjects/user/info.htm?pubId=gh_51790c1ef5c3&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect">wechat</a></li>
+				
+				<li><a href="wap/user/getVerifiCode_123.htm">getVerifiCode</a></li>
 			</ul>
 		</div>
 	</div>

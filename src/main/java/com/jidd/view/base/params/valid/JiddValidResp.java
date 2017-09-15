@@ -1,7 +1,5 @@
 package com.jidd.view.base.params.valid;
 
-import org.springframework.stereotype.Component;
-
 import java.io.Serializable;
 
 //@Component

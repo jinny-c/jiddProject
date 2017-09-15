@@ -1,5 +1,7 @@
-package com.jidd.basic.cache;
+package com.jidd.project.base.cache;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
@@ -13,40 +15,49 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
 @Component
-public class JiddCacheManager {
+public class JiddProjectCacheManager {
 	/** 日志 */
-	private static Logger log = LoggerFactory.getLogger(JiddCacheManager.class);
+	private static Logger log = LoggerFactory.getLogger(JiddProjectCacheManager.class);
 
 	private LoadingCache<String, String> jiddConfigCache;
+	
+	public static Map<String, String> cacheMap = new HashMap<String, String>();
 
 	@PostConstruct
 	public void init() {
 		jiddConfigCache = CacheBuilder.newBuilder()
-				.refreshAfterWrite(1, TimeUnit.HOURS)  //默认24个小时过期
+				.refreshAfterWrite(4, TimeUnit.HOURS) // 默认4个小时过期
 				.build(new CacheLoader<String, String>() {
 					@Override
 					public String load(String key) throws Exception {
-						//JiddPubNoInfoDTO microPubNoInfoDTO = microPubNoInfoService.queryPubNoInfoById(pubId);
-						log.info("init add start,key={}", key);
-						return "cache init value";
+						log.debug("LoadingCache start:key={}", key);
+						return cacheMap.get(key);
 					}
 				});
 	}
 	
 	/**
 	 * 从缓存中读取信息
-	 *
+	 * @param key
 	 * @return
 	 */
 	public String getCacheConfig(String key) {
 		try {
+			return jiddConfigCache.getUnchecked(key);//未声明CacheLoader异常
 			//Optional<T> cacheRes = jiddConfigCache.asMap().get(key);
-			//return jiddConfigCache.getUnchecked(key);//未声明CacheLoader异常
-			return jiddConfigCache.get(key);//已声明CacheLoader异常
+			//return jiddConfigCache.get(key);//已声明CacheLoader.load异常
 		} catch (Exception e) {
 			log.error("从内存中获取信息失败", e);
 		}
 		return null;
+	}
+	
+	public void setCacheConfig(String key, String value) {
+		try {
+			jiddConfigCache.put(key, value);
+		} catch (Exception e) {
+			log.error("set cache exception", e);
+		}
 	}
 
 	public void refreshCache(String key) {
@@ -62,6 +73,22 @@ public class JiddCacheManager {
 		}
 	}
 
+	public void refreshCache() {
+		log.info("refreshCache start");
+		try {
+			if (null == cacheMap || cacheMap.isEmpty()) {
+				log.error("refreshCache cacheMap is null");
+				return;
+			}
+			log.error("cacheMap={}",cacheMap);
+			for (Map.Entry<String, String> entry : cacheMap.entrySet()) {
+				jiddConfigCache.put(entry.getKey(), entry.getValue());
+			}
+			
+		} catch (Exception e) {
+			log.error("refreshCache Exception", e);
+		}
+	}
 	public void clearAllCache() {
 		jiddConfigCache.invalidateAll();
 	}
