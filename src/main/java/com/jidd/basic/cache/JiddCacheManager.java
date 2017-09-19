@@ -53,7 +53,7 @@ public class JiddCacheManager {
 	public void refreshCache(String key) {
 		try {
 			String cacheRes = jiddConfigCache.asMap().get(key);
-			String value = "test,catch is not null";
+			String value = "catch is not null";
 			if (cacheRes == null) {
 				value = "test,cache is null";
 			}
