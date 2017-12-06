@@ -37,10 +37,10 @@ public class JiddPubNoCacheManager {
 				.build(new CacheLoader<String, Optional<JiddPubNoInfoDTO>>() {
 					@Override
 					public Optional<JiddPubNoInfoDTO> load(String pubId) throws Exception {
-						JiddPubNoInfoDTO microPubNoInfoDTO = getTestDto();
-						//JiddPubNoInfoDTO microPubNoInfoDTO = microPubNoInfoService.queryPubNoInfoById(pubId);
-						log.info("微信公众号信息：{}", microPubNoInfoDTO);
-						return Optional.fromNullable(microPubNoInfoDTO);
+						JiddPubNoInfoDTO pubNoInfoDTO = getTestDto();
+						//JiddPubNoInfoDTO PubNoInfoDTO = PubNoInfoService.queryPubNoInfoById(pubId);
+						log.info("微信公众号信息：{}", pubNoInfoDTO);
+						return Optional.fromNullable(pubNoInfoDTO);
 					}
 				});
 	}

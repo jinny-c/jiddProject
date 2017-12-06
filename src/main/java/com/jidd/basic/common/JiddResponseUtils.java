@@ -14,7 +14,6 @@ import com.jidd.view.base.modelview.RespErr;
 /**
  * 维护响应信息
  *
- * @version 1.0 2016年12月28日
  * @history
  */
 public class JiddResponseUtils {
@@ -52,7 +51,6 @@ public class JiddResponseUtils {
 	/**
 	 * 返回错误信息
 	 *
-	 * @version 1.0 2016年09月19日
 	 * @history
 	 */
 	public static void writeToResponse(HttpServletResponse response, String msg)

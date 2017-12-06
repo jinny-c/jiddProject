@@ -21,7 +21,6 @@ import com.jidd.view.wechat.service.IJiddPubNumTokenCacheService;
 
 /**
  *
- * @version 1.0 2017年01月13日
  * @history
  */
 @Controller

@@ -18,7 +18,6 @@ import com.jidd.view.wechat.service.IJiddPubNumTokenCacheService;
 /**
  * SpringContext监听器
  *
- * @version 1.0 2017年07月27日
  * @history
  */
 public class SpringContextListener implements ApplicationListener<ApplicationContextEvent> {
